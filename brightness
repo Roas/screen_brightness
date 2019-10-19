@@ -1,0 +1,19 @@
+#!/usr/bin/python3
+
+from os import geteuid
+from subprocess import call
+import sys 
+from argparse import ArgumentParser
+
+parser = ArgumentParser(description="Change screen brightness")
+parser.add_argument('brightness', type=int, nargs='+',
+    help="The brightness percentage to set the screen to")
+
+args = parser.parse_args()
+
+if geteuid() != 0:
+    call(['sudo', *sys.argv])
+else:
+    with open('/sys/class/backlight/nv_backlight/brightness', 'wt') as f:
+        f.write(str(args.brightness[0]))
+sys.exit()
