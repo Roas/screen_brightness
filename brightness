@@ -2,18 +2,36 @@
 
 from os import geteuid
 from subprocess import call
-import sys 
+import sys
 from argparse import ArgumentParser
 
-parser = ArgumentParser(description="Change screen brightness")
-parser.add_argument('brightness', type=int, nargs='+',
-    help="The brightness percentage to set the screen to")
 
-args = parser.parse_args()
+def parse_arugments():
+    parser = ArgumentParser(description="Change screen brightness")
+    parser.add_argument(
+        'brightness',
+        type=int,
+        nargs='+',
+        help="The brightness percentage to set the screen to"
+    )
+    args = parser.parse_args()
+    if args.brightness[0] >= 0 and args.brightness[0] <= 100:
+        return args
+    else:
+        print("Brightness needs to be between 0 and 100 percent")
+        sys.exit()
 
-if geteuid() != 0:
-    call(['sudo', *sys.argv])
-else:
+
+def main():
+    args = parse_arugments()
+
+    if geteuid() != 0:
+        call(['sudo', *sys.argv])
+        sys.exit()
+
     with open('/sys/class/backlight/nv_backlight/brightness', 'wt') as f:
         f.write(str(args.brightness[0]))
-sys.exit()
+
+
+if __name__ == '__main__':
+    main()
